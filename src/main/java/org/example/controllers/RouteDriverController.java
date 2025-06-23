@@ -1,7 +1,7 @@
 package org.example.controllers;
 
-import models.entities.RouteDriver;
-import models.repositories.RouteDriverRepository;
+import org.example.models.entities.RouteDriver;
+import org.example.models.repositories.RouteDriverRepository;
 
 import java.util.List;
 

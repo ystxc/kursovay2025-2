@@ -6,7 +6,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CompanyRepository {
+public class CompanyRepository implements Repository<Company> {
     private static CompanyRepository instance;
     private Connection connection;
     private List<Company> cache = new ArrayList<>();
@@ -16,7 +16,7 @@ public class CompanyRepository {
             // 1. Регистрация драйвера (для Java 9+)
             Class.forName("org.mariadb.jdbc.Driver");
 
-            // 2. Установка соединения (ДОБАВЬТЕ ВАШИ РЕАЛЬНЫЕ ЛОГИН/ПАРОЛЬ!)
+            // 2. Установка соединения (замените логин и пароль на ваши)
             connection = DriverManager.getConnection(
                     "jdbc:mariadb://localhost:3306/cargo_transportation?useSSL=false&serverTimezone=UTC",
                     "root",
@@ -30,10 +30,17 @@ public class CompanyRepository {
     }
 
     public static CompanyRepository getInstance() {
-        if (instance == null) instance = new CompanyRepository();
+        if (instance == null) {
+            synchronized (CompanyRepository.class) {
+                if (instance == null) {
+                    instance = new CompanyRepository();
+                }
+            }
+        }
         return instance;
     }
 
+    @Override
     public List<Company> getAll() {
         cache.clear();
         try (PreparedStatement stmt = connection.prepareStatement("SELECT * FROM companies")) {
@@ -44,9 +51,10 @@ public class CompanyRepository {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return cache;
+        return new ArrayList<>(cache); // Чтобы не отдавать внутренний список напрямую
     }
 
+    @Override
     public void create(Company company) {
         try (PreparedStatement stmt = connection.prepareStatement(
                 "INSERT INTO companies (id, name) VALUES (?, ?)")) {
@@ -58,6 +66,7 @@ public class CompanyRepository {
         }
     }
 
+    @Override
     public void update(Company company) {
         try (PreparedStatement stmt = connection.prepareStatement(
                 "UPDATE companies SET name = ? WHERE id = ?")) {
@@ -69,6 +78,7 @@ public class CompanyRepository {
         }
     }
 
+    @Override
     public void delete(int id) {
         try (PreparedStatement stmt = connection.prepareStatement(
                 "DELETE FROM companies WHERE id = ?")) {

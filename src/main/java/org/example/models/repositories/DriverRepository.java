@@ -6,31 +6,37 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DriverRepository {
-    private static DriverRepository instance;
+public class DriverRepository implements Repository<Driver> {
+    private static volatile DriverRepository instance;
     private Connection connection;
 
     private DriverRepository() {
         try {
-            // 1. Регистрация драйвера (для Java 9+)
             Class.forName("org.mariadb.jdbc.Driver");
-
-            // 2. Установка соединения (ДОБАВЬТЕ ВАШИ РЕАЛЬНЫЕ ЛОГИН/ПАРОЛЬ!)
             connection = DriverManager.getConnection(
                     "jdbc:mariadb://localhost:3306/cargo_transportation?useSSL=false&serverTimezone=UTC",
                     "root",
                     ""
             );
-        } catch (Exception e) {
+        } catch (ClassNotFoundException | SQLException e) {
+            // Можно заменить на логгер, например Log4j или SLF4J
             e.printStackTrace();
+            throw new RuntimeException("Failed to initialize DriverRepository", e);
         }
     }
 
     public static DriverRepository getInstance() {
-        if (instance == null) instance = new DriverRepository();
+        if (instance == null) {
+            synchronized (DriverRepository.class) {
+                if (instance == null) {
+                    instance = new DriverRepository();
+                }
+            }
+        }
         return instance;
     }
 
+    @Override
     public List<Driver> getAll() {
         List<Driver> drivers = new ArrayList<>();
         String sql = "SELECT * FROM drivers";
@@ -51,6 +57,7 @@ public class DriverRepository {
         return drivers;
     }
 
+    @Override
     public void create(Driver driver) {
         String sql = "INSERT INTO drivers (id, last_name, first_name, middle_name, experience_years) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -69,6 +76,7 @@ public class DriverRepository {
         }
     }
 
+    @Override
     public void update(Driver driver) {
         String sql = "UPDATE drivers SET last_name = ?, first_name = ?, middle_name = ?, experience_years = ? WHERE id = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -87,6 +95,7 @@ public class DriverRepository {
         }
     }
 
+    @Override
     public void delete(int id) {
         String sql = "DELETE FROM drivers WHERE id = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {

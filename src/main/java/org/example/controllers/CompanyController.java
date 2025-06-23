@@ -1,7 +1,7 @@
 package org.example.controllers;
 
-import models.entities.Company;
-import models.repositories.CompanyRepository;
+import org.example.models.entities.Company;
+import org.example.models.repositories.CompanyRepository;
 
 import java.util.List;
 

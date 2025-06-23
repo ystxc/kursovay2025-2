@@ -1,7 +1,7 @@
 package org.example.controllers;
 
-import models.entities.Driver;
-import models.repositories.DriverRepository;
+import org.example.models.entities.Driver;
+import org.example.models.repositories.DriverRepository;
 
 import java.util.List;
 

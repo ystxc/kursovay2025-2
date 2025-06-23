@@ -1,103 +1,59 @@
 package org.example.models.repositories;
 
 import org.example.models.entities.RouteDriver;
-
-import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RouteDriverRepository {
+public class RouteDriverRepository implements Repository<RouteDriver> {
+
     private static RouteDriverRepository instance;
-    private Connection connection;
+
+    // Пример внутреннего хранилища, замени на свою реализацию
+    private final List<RouteDriver> storage = new ArrayList<>();
 
     private RouteDriverRepository() {
-        try {
-            // 1. Регистрация драйвера (для Java 9+)
-            Class.forName("org.mariadb.jdbc.Driver");
-
-            // 2. Установка соединения (ДОБАВЬТЕ ВАШИ РЕАЛЬНЫЕ ЛОГИН/ПАРОЛЬ!)
-            connection = DriverManager.getConnection(
-                    "jdbc:mariadb://localhost:3306/cargo_transportation?useSSL=false&serverTimezone=UTC",
-                    "root",
-                    ""
-            );
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // private конструктор с инициализацией, если нужно
     }
 
     public static RouteDriverRepository getInstance() {
-        if (instance == null) instance = new RouteDriverRepository();
+        if (instance == null) {
+            instance = new RouteDriverRepository();
+        }
         return instance;
     }
 
+    @Override
     public List<RouteDriver> getAll() {
-        List<RouteDriver> routeDrivers = new ArrayList<>();
-        String sql = "SELECT * FROM route_drivers";
-        try (PreparedStatement stmt = connection.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-            while (rs.next()) {
-                routeDrivers.add(new RouteDriver(
-                        rs.getInt("route_id"),
-                        rs.getInt("driver_id"),
-                        rs.getDate("departure_date").toLocalDate(),
-                        rs.getDate("arrival_date").toLocalDate(),
-                        rs.getBoolean("bonus_status"),
-                        rs.getBigDecimal("actual_payment")
-                ));
+        // Возвращаем копию списка, чтобы внешний код не менял внутреннее хранилище напрямую
+        return new ArrayList<>(storage);
+    }
+
+    @Override
+    public void create(RouteDriver entity) {
+        storage.add(entity);
+    }
+
+    @Override
+    public void update(RouteDriver entity) {
+        // Найдем существующий элемент по составному ключу и обновим его
+        for (int i = 0; i < storage.size(); i++) {
+            RouteDriver rd = storage.get(i);
+            if (rd.getRouteId() == entity.getRouteId() && rd.getDriverId() == entity.getDriverId()) {
+                storage.set(i, entity);
+                return;
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
-        return routeDrivers;
+        throw new IllegalArgumentException("Entity not found for update");
     }
 
-    // Создание записи
-    public void create(RouteDriver routeDriver) {
-        String sql = "INSERT INTO route_drivers " +
-                "(route_id, driver_id, departure_date, arrival_date, bonus_status, actual_payment) " +
-                "VALUES (?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, routeDriver.getRouteId());
-            stmt.setInt(2, routeDriver.getDriverId());
-            stmt.setDate(3, routeDriver.getDepartureDate());
-            stmt.setDate(4, routeDriver.getArrivalDate());
-            stmt.setBoolean(5, routeDriver.isBonusStatus());
-            stmt.setBigDecimal(6, routeDriver.getActualPayment());
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    @Override
+    public void delete(int id) {
+        // Поскольку у RouteDriver составной ключ, метод delete по одному id не применим
+        throw new UnsupportedOperationException("Use delete(routeId, driverId) instead.");
     }
 
-    // Обновление записи
-    public void update(RouteDriver routeDriver) {
-        String sql = "UPDATE route_drivers SET departure_date = ?, arrival_date = ?, " +
-                "bonus_status = ?, actual_payment = ? " +
-                "WHERE route_id = ? AND driver_id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setDate(1, routeDriver.getDepartureDate());
-            stmt.setDate(2, routeDriver.getArrivalDate());
-            stmt.setBoolean(3, routeDriver.isBonusStatus());
-            stmt.setBigDecimal(4, routeDriver.getActualPayment());
-            stmt.setInt(5, routeDriver.getRouteId());
-            stmt.setInt(6, routeDriver.getDriverId());
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    // Удаление записи по составному ключу
+    // Метод удаления по составному ключу (routeId и driverId)
     public void delete(int routeId, int driverId) {
-        String sql = "DELETE FROM route_drivers WHERE route_id = ? AND driver_id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, routeId);
-            stmt.setInt(2, driverId);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        storage.removeIf(rd -> rd.getRouteId() == routeId && rd.getDriverId() == driverId);
     }
 }
-

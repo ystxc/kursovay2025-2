@@ -1,7 +1,7 @@
 package org.example.controllers;
 
-import models.entities.Route;
-import models.repositories.RouteRepository;
+import org.example.models.entities.Route;
+import org.example.models.repositories.RouteRepository;
 
 import java.util.List;
 
