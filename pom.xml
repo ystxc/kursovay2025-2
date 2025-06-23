@@ -19,12 +19,23 @@
   </properties>
 
   <dependencies>
+    <!-- JUnit Jupiter API: для написания тестов -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>5.7.1</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- JUnit Jupiter Engine: для запуска тестов -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
       <version>5.7.1</version>
       <scope>test</scope>
     </dependency>
+
+    <!-- JUnit Jupiter Params: для параметризированных тестов (опционально) -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-params</artifactId>
@@ -32,6 +43,7 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
 
   <build>
     <plugins>
