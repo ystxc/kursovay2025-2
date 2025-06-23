@@ -1,7 +1,7 @@
-package views;
+package org.example.views;
 
-import models.entities.Route;
-import models.repositories.RouteRepository;
+import org.example.models.entities.Route;
+import org.example.models.repositories.RouteRepository;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;

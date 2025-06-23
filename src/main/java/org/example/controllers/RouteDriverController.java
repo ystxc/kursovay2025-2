@@ -1,4 +1,4 @@
-package controllers;
+package org.example.controllers;
 
 import models.entities.RouteDriver;
 import models.repositories.RouteDriverRepository;

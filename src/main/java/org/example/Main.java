@@ -1,4 +1,6 @@
-import views.CompanyView;
+package org.example;
+
+import org.example.views.CompanyView;
 
 import javax.swing.*;
 

@@ -1,15 +1,13 @@
-package views;
+package org.example.views;
 
-import models.entities.RouteDriver;
-import models.repositories.RouteDriverRepository;
+import org.example.models.entities.RouteDriver;
+import org.example.models.repositories.RouteDriverRepository;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.math.BigDecimal;
-import java.sql.Date;
-import java.time.LocalDate;
 import java.util.List;
 
 public class RouteDriverView extends JFrame {

@@ -1,7 +1,7 @@
-package views;
+package org.example.views;
 
-import models.entities.Company;
-import models.repositories.CompanyRepository;
+import org.example.models.entities.Company;
+import org.example.models.repositories.CompanyRepository;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;

@@ -1,6 +1,6 @@
-package models.repositories;
+package org.example.models.repositories;
 
-import models.entities.Route;
+import org.example.models.entities.Route;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -12,8 +12,15 @@ public class RouteRepository {
 
     private RouteRepository() {
         try {
+            // 1. Регистрация драйвера (для Java 9+)
+            Class.forName("org.mariadb.jdbc.Driver");
+
+            // 2. Установка соединения (ДОБАВЬТЕ ВАШИ РЕАЛЬНЫЕ ЛОГИН/ПАРОЛЬ!)
             connection = DriverManager.getConnection(
-                    "jdbc:mysql://localhost:3306/cargo_transportation", " ", "");
+                    "jdbc:mariadb://localhost:3306/cargo_transportation?useSSL=false&serverTimezone=UTC",
+                    "root",
+                    ""
+            );
         } catch (Exception e) {
             e.printStackTrace();
         }
