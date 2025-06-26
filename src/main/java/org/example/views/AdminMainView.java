@@ -14,47 +14,109 @@ public class AdminMainView extends JFrame {
 
     public AdminMainView(User user) {
         this.user = user;
-        setTitle("Admin Panel - " + user.getUsername());
-        setSize(600, 400);
+        setTitle("logistics++ - Панель администратора");
+        setSize(600, 450);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+        getContentPane().setBackground(Color.WHITE);
 
-        JPanel panel = new JPanel(new GridLayout(5, 1, 5, 5));
+        // Главная панель
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        mainPanel.setBackground(Color.WHITE);
 
-        JButton btnDrivers = new JButton("Manage Drivers");
-        JButton btnCompanies = new JButton("Manage Companies");
-        JButton btnRoutes = new JButton("Manage Routes");
-        JButton btnRouteDrivers = new JButton("Manage Route-Drivers");
-        JButton btnLogout = new JButton("Logout");
+        // Заголовок
+        JLabel titleLabel = new JLabel("Добро пожаловать, " + user.getUsername() + " (Администратор)");
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
+        mainPanel.add(titleLabel, BorderLayout.NORTH);
 
-        panel.add(btnDrivers);
-        panel.add(btnCompanies);
-        panel.add(btnRoutes);
-        panel.add(btnRouteDrivers);
-        panel.add(btnLogout);
+        // Панель с основными кнопками
+        JPanel buttonPanel = new JPanel(new GridLayout(4, 1, 10, 10));
+        buttonPanel.setBackground(Color.WHITE);
 
-        add(panel);
+        JButton btnDrivers = createMenuButton("Управление водителями");
+        JButton btnCompanies = createMenuButton("Управление компаниями");
+        JButton btnRoutes = createMenuButton("Управление маршрутами");
+        JButton btnRouteDrivers = createMenuButton("Назначения маршрутов");
 
-        btnDrivers.addActionListener(e -> {
-            new DriverView().setVisible(true);
+        buttonPanel.add(btnDrivers);
+        buttonPanel.add(btnCompanies);
+        buttonPanel.add(btnRoutes);
+        buttonPanel.add(btnRouteDrivers);
+
+        mainPanel.add(buttonPanel, BorderLayout.CENTER);
+
+        // Нижняя панель с кнопками
+        JPanel bottomPanel = new JPanel(new GridLayout(1, 2, 10, 0));
+        bottomPanel.setBackground(Color.WHITE);
+        bottomPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+
+        JButton btnLogout = createActionButton("Выйти");
+        JButton btnEditProfile = createActionButton("Редактировать профиль");
+
+        bottomPanel.add(btnLogout);
+        bottomPanel.add(btnEditProfile);
+
+        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
+
+        add(mainPanel);
+
+        // Обработчики событий
+        btnCompanies.addActionListener(e -> {
+            new CompanyView(CompanyRepository.getInstance()).setVisible(true);
         });
 
-        btnCompanies.addActionListener(e -> {
-            new CompanyView().setVisible(true);
+        btnDrivers.addActionListener(e -> {
+            new DriverView(DriverRepository.getInstance()).setVisible(true);
         });
 
         btnRoutes.addActionListener(e -> {
-            new RouteView().setVisible(true);
+            new RouteView(RouteRepository.getInstance()).setVisible(true);
         });
 
         btnRouteDrivers.addActionListener(e -> {
-            new RouteDriverView().setVisible(true);
+            new RouteDriverView(RouteDriverRepository.getInstance()).setVisible(true);
         });
-
 
         btnLogout.addActionListener(e -> {
             this.dispose();
             new LoginView().setVisible(true);
         });
+
+        btnEditProfile.addActionListener(e -> {
+            new EditProfileView(user).setVisible(true);
+        });
+    }
+
+    private JButton createMenuButton(String text) {
+        JButton button = new JButton(text);
+        button.setBackground(new Color(176, 224, 230));
+        button.setForeground(Color.BLACK);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(150, 200, 220)),
+                BorderFactory.createEmptyBorder(10, 15, 10, 15)
+        ));
+        button.setOpaque(true);
+        button.setContentAreaFilled(true);
+        button.setBorderPainted(true);
+        button.setMargin(new Insets(5, 10, 5, 10));
+        return button;
+    }
+
+    private JButton createActionButton(String text) {
+        JButton button = new JButton(text);
+        button.setBackground(new Color(200, 230, 240));
+        button.setForeground(Color.BLACK);
+        button.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(180, 210, 230)),
+                BorderFactory.createEmptyBorder(5, 15, 5, 15)
+        ));
+        return button;
     }
 }

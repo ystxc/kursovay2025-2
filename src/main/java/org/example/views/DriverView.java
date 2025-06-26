@@ -4,15 +4,13 @@ import org.example.models.entities.Driver;
 import org.example.models.repositories.DriverRepository;
 
 import javax.swing.*;
-import java.awt.*;
 import java.util.List;
 
 public class DriverView extends BaseView<Driver> {
     private JTextField txtId, txtLastName, txtFirstName, txtMiddleName, txtExperienceYears;
 
-    public DriverView() {
-        super("Drivers", new String[]{"ID", "Last Name", "First Name", "Middle Name", "Experience Years"},
-                DriverRepository.getInstance());
+    public DriverView(DriverRepository repository) {
+        super("Водители", new String[]{"ID", "Фамилия", "Имя", "Отчество", "Стаж (лет)"}, repository);
         setSize(800, 520);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -20,7 +18,6 @@ public class DriverView extends BaseView<Driver> {
 
     @Override
     protected void initForm() {
-        // Создаем поля и добавляем через addFormField
         txtId = new JTextField();
         txtLastName = new JTextField();
         txtFirstName = new JTextField();
@@ -28,10 +25,10 @@ public class DriverView extends BaseView<Driver> {
         txtExperienceYears = new JTextField();
 
         addFormField("ID:", txtId);
-        addFormField("Last Name:", txtLastName);
-        addFormField("First Name:", txtFirstName);
-        addFormField("Middle Name:", txtMiddleName);
-        addFormField("Experience Years:", txtExperienceYears);
+        addFormField("Фамилия:", txtLastName);
+        addFormField("Имя:", txtFirstName);
+        addFormField("Отчество:", txtMiddleName);
+        addFormField("Стаж (лет):", txtExperienceYears);
     }
 
     @Override
@@ -73,13 +70,13 @@ public class DriverView extends BaseView<Driver> {
                     expYears = Integer.parseInt(txtExperienceYears.getText().trim());
                 }
                 if (lastName.isEmpty() || firstName.isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Last Name and First Name cannot be empty");
+                    JOptionPane.showMessageDialog(this, "Фамилия и имя не могут быть пустыми");
                     return;
                 }
                 repository.create(new Driver(id, lastName, firstName, middleName, expYears));
                 loadData();
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "Invalid number format");
+                JOptionPane.showMessageDialog(this, "Неверный числовой формат");
             }
         });
 
@@ -94,13 +91,13 @@ public class DriverView extends BaseView<Driver> {
                     expYears = Integer.parseInt(txtExperienceYears.getText().trim());
                 }
                 if (lastName.isEmpty() || firstName.isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "Last Name and First Name cannot be empty");
+                    JOptionPane.showMessageDialog(this, "Фамилия и имя не могут быть пустыми");
                     return;
                 }
                 repository.update(new Driver(id, lastName, firstName, middleName, expYears));
                 loadData();
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "Invalid number format");
+                JOptionPane.showMessageDialog(this, "Неверный числовой формат");
             }
         });
 
@@ -110,7 +107,7 @@ public class DriverView extends BaseView<Driver> {
                 repository.delete(id);
                 loadData();
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "Invalid ID");
+                JOptionPane.showMessageDialog(this, "Неверный ID");
             }
         });
 

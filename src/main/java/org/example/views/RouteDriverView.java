@@ -6,14 +6,13 @@ import org.example.models.repositories.RouteDriverRepository;
 import javax.swing.*;
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.util.List;
 
 public class RouteDriverView extends BaseView<RouteDriver> {
     private JTextField txtRouteId, txtDriverId, txtDepartureDate, txtArrivalDate, txtBonusStatus, txtActualPayment;
 
-    public RouteDriverView() {
-        super("Route Drivers",
-                new String[]{"Route ID", "Driver ID", "Departure Date", "Arrival Date", "Bonus Status", "Actual Payment"},
-                RouteDriverRepository.getInstance());
+    public RouteDriverView(RouteDriverRepository repository) {
+        super("Маршруты-Водители", new String[]{"ID Маршрута", "ID Водителя", "Дата отправления", "Дата прибытия", "Статус премии", "Выплата"}, repository);
         setSize(900, 520);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -28,12 +27,12 @@ public class RouteDriverView extends BaseView<RouteDriver> {
         txtBonusStatus = new JTextField();
         txtActualPayment = new JTextField();
 
-        addFormField("Route ID:", txtRouteId);
-        addFormField("Driver ID:", txtDriverId);
-        addFormField("Departure Date (YYYY-MM-DD):", txtDepartureDate);
-        addFormField("Arrival Date (YYYY-MM-DD):", txtArrivalDate);
-        addFormField("Bonus Status (true/false):", txtBonusStatus);
-        addFormField("Actual Payment:", txtActualPayment);
+        addFormField("ID Маршрута:", txtRouteId);
+        addFormField("ID Водителя:", txtDriverId);
+        addFormField("Дата отправления (ГГГГ-ММ-ДД):", txtDepartureDate);
+        addFormField("Дата прибытия (ГГГГ-ММ-ДД):", txtArrivalDate);
+        addFormField("Статус премии (да/нет):", txtBonusStatus);
+        addFormField("Сумма выплаты:", txtActualPayment);
     }
 
     @Override
@@ -49,12 +48,13 @@ public class RouteDriverView extends BaseView<RouteDriver> {
     @Override
     protected void loadData() {
         tableModel.setRowCount(0);
-        for (RouteDriver rd : repository.getAll()) {
+        List<RouteDriver> list = repository.getAll();
+        for (RouteDriver rd : list) {
             tableModel.addRow(new Object[]{
                     rd.getRouteId(),
                     rd.getDriverId(),
-                    rd.getDepartureDate(),
                     rd.getArrivalDate(),
+                    rd.getDepartureDate(),
                     rd.isBonusStatus(),
                     rd.getActualPayment()
             });
@@ -70,7 +70,7 @@ public class RouteDriverView extends BaseView<RouteDriver> {
                 repository.create(rd);
                 loadData();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Invalid input: " + ex.getMessage());
+                JOptionPane.showMessageDialog(this, "Ошибка ввода: " + ex.getMessage());
             }
         });
 
@@ -80,7 +80,7 @@ public class RouteDriverView extends BaseView<RouteDriver> {
                 repository.update(rd);
                 loadData();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Invalid input: " + ex.getMessage());
+                JOptionPane.showMessageDialog(this, "Ошибка ввода: " + ex.getMessage());
             }
         });
 
@@ -88,11 +88,10 @@ public class RouteDriverView extends BaseView<RouteDriver> {
             try {
                 int routeId = Integer.parseInt(txtRouteId.getText().trim());
                 int driverId = Integer.parseInt(txtDriverId.getText().trim());
-                // Удаляем запись по составному ключу
                 ((RouteDriverRepository) repository).delete(routeId, driverId);
                 loadData();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Invalid ID pair: " + ex.getMessage());
+                JOptionPane.showMessageDialog(this, "Неверная пара ID: " + ex.getMessage());
             }
         });
 
@@ -109,7 +108,6 @@ public class RouteDriverView extends BaseView<RouteDriver> {
     private RouteDriver parseForm() throws Exception {
         int routeId = Integer.parseInt(txtRouteId.getText().trim());
         int driverId = Integer.parseInt(txtDriverId.getText().trim());
-        // Преобразуем даты из строки в LocalDate через java.sql.Date
         var departureDate = Date.valueOf(txtDepartureDate.getText().trim()).toLocalDate();
         var arrivalDate = Date.valueOf(txtArrivalDate.getText().trim()).toLocalDate();
         boolean bonusStatus = Boolean.parseBoolean(txtBonusStatus.getText().trim());

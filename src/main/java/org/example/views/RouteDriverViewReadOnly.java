@@ -4,49 +4,90 @@ import org.example.models.entities.RouteDriver;
 import org.example.models.repositories.RouteDriverRepository;
 
 import javax.swing.*;
+import javax.swing.table.JTableHeader;
 import java.awt.*;
+import java.util.List;
 
 public class RouteDriverViewReadOnly extends BaseView<RouteDriver> {
 
     public RouteDriverViewReadOnly() {
-        super("Route-Drivers (Read-Only)",
-                new String[]{"Route ID", "Driver ID", "Departure Date", "Arrival Date", "Bonus Status", "Actual Payment"},
+        super("logistics++ - Маршруты-Водители (просмотр)",
+                new String[]{"ID Маршрута", "ID Водителя", "Дата отправления", "Дата прибытия", "Статус премии", "Выплата"},
                 RouteDriverRepository.getInstance());
 
-        setSize(800, 450);
+        setSize(900, 500);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        getContentPane().setBackground(Color.WHITE);
 
-        // Отключаем кнопки, так как это Read-Only
-        btnCreate.setEnabled(false);
-        btnUpdate.setEnabled(false);
-        btnDelete.setEnabled(false);
-        btnRefresh.addActionListener(e -> loadData());  // Оставим кнопку Refresh
+        // Настройка таблицы
+        table.setSelectionBackground(new Color(230, 242, 255));
+        table.setGridColor(new Color(220, 220, 220));
+        table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        table.setRowHeight(30);
 
-        // Убираем форму, если она не нужна
+        // Заголовок таблицы
+        JTableHeader header = table.getTableHeader();
+        header.setBackground(new Color(176, 224, 230));
+        header.setFont(new Font("Segoe UI", Font.BOLD, 14));
+
+        // ненужные элементы
+        btnCreate.setVisible(false);
+        btnUpdate.setVisible(false);
+        btnDelete.setVisible(false);
         formPanel.setVisible(false);
+
+        // кнопка обновления
+        btnRefresh.setText("Обновить");
+        btnRefresh.setBackground(new Color(176, 224, 230));
+        btnRefresh.setForeground(Color.BLACK);
+        btnRefresh.setFocusPainted(false);
+        btnRefresh.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnRefresh.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(200, 200, 200)),
+                BorderFactory.createEmptyBorder(8, 25, 8, 25)
+        ));
+
+        // новая компоновка
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(Color.WHITE);
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+
+        // Панель с кнопкой обновления
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.setBackground(Color.WHITE);
+        buttonPanel.add(btnRefresh);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        setContentPane(mainPanel);
+
+        loadData();
     }
 
     @Override
     protected void initForm() {
-        // Не нужно реализовывать, т.к. форма скрыта
+
     }
 
     @Override
     protected void fillFormFromTable(int row) {
-        // Можно не реализовывать, т.к. нет редактирования
+
     }
 
     @Override
     protected void loadData() {
         tableModel.setRowCount(0);
-        for (RouteDriver rd : repository.getAll()) {
+        List<RouteDriver> routeDrivers = repository.getAll();
+        for (RouteDriver rd : routeDrivers) {
             tableModel.addRow(new Object[]{
                     rd.getRouteId(),
                     rd.getDriverId(),
                     rd.getDepartureDate(),
                     rd.getArrivalDate(),
-                    rd.isBonusStatus(),
+                    rd.isBonusStatus() ? "Да" : "Нет",
                     rd.getActualPayment()
             });
         }
@@ -54,7 +95,6 @@ public class RouteDriverViewReadOnly extends BaseView<RouteDriver> {
 
     @Override
     protected void initActions() {
-        // Отключаем кнопки, добавляем только refresh
         btnRefresh.addActionListener(e -> loadData());
     }
 }

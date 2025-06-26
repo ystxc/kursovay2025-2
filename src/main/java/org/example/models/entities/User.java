@@ -4,7 +4,7 @@ public class User {
     private int id;
     private String username;
     private String hashedPassword;
-    private String role; // Например: "admin", "user"
+    private String role;
 
     public User(int id, String username, String hashedPassword, String role) {
         this.id = id;

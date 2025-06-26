@@ -1,18 +1,32 @@
 package org.example.models.repositories;
 
 import org.example.models.entities.RouteDriver;
+
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class RouteDriverRepository implements Repository<RouteDriver> {
 
     private static RouteDriverRepository instance;
+    private java.sql.Connection connection;
 
-    // Пример внутреннего хранилища, замени на свою реализацию
     private final List<RouteDriver> storage = new ArrayList<>();
 
     private RouteDriverRepository() {
-        // private конструктор с инициализацией, если нужно
+        try {
+            Class.forName("org.mariadb.jdbc.Driver");
+            connection = DriverManager.getConnection(
+                    "jdbc:mariadb://localhost:3306/cargo_transportation?useSSL=false&serverTimezone=UTC",
+                    "root",
+                    ""
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static RouteDriverRepository getInstance() {
@@ -24,9 +38,28 @@ public class RouteDriverRepository implements Repository<RouteDriver> {
 
     @Override
     public List<RouteDriver> getAll() {
-        // Возвращаем копию списка, чтобы внешний код не менял внутреннее хранилище напрямую
-        return new ArrayList<>(storage);
+        List<RouteDriver> routeDrivers = new ArrayList<>();
+        String sql = "SELECT * FROM route_drivers";
+        try (PreparedStatement stmt = connection.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                routeDrivers.add(new RouteDriver(
+                        rs.getInt("route_id"),
+                        rs.getInt("driver_id"),
+                        rs.getDate("departure_date").toLocalDate(),
+                        rs.getDate("arrival_date").toLocalDate(),
+                        rs.getBoolean("bonus_status"),
+                        rs.getBigDecimal("actual_payment")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return routeDrivers;
     }
+
+
+
 
     @Override
     public void create(RouteDriver entity) {
@@ -35,7 +68,7 @@ public class RouteDriverRepository implements Repository<RouteDriver> {
 
     @Override
     public void update(RouteDriver entity) {
-        // Найдем существующий элемент по составному ключу и обновим его
+
         for (int i = 0; i < storage.size(); i++) {
             RouteDriver rd = storage.get(i);
             if (rd.getRouteId() == entity.getRouteId() && rd.getDriverId() == entity.getDriverId()) {
@@ -43,16 +76,15 @@ public class RouteDriverRepository implements Repository<RouteDriver> {
                 return;
             }
         }
-        throw new IllegalArgumentException("Entity not found for update");
+        throw new IllegalArgumentException("Объект для обновления не найден");
     }
 
     @Override
     public void delete(int id) {
-        // Поскольку у RouteDriver составной ключ, метод delete по одному id не применим
-        throw new UnsupportedOperationException("Use delete(routeId, driverId) instead.");
+        // составной ключ
+        throw new UnsupportedOperationException("Вместо этого используйте delete(идентификатор маршрута, идентификатор водителя).");
     }
-
-    // Метод удаления по составному ключу (routeId и driverId)
+    // Метод удаления по составному ключу
     public void delete(int routeId, int driverId) {
         storage.removeIf(rd -> rd.getRouteId() == routeId && rd.getDriverId() == driverId);
     }

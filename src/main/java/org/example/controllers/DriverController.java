@@ -17,7 +17,6 @@ public class DriverController {
     }
 
     public void addDriver(Driver driver) {
-        // Здесь можно добавить валидацию
         repository.create(driver);
     }
 

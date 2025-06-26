@@ -77,4 +77,55 @@ public class UserRepository {
         }
         return users;
     }
+
+    public User getById(int id) {
+        String sql = "SELECT * FROM users WHERE id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return new User(
+                        rs.getInt("id"),
+                        rs.getString("username"),
+                        rs.getString("password_hash"),
+                        rs.getString("role")
+                );
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public User getByUsername(String username) {
+        String sql = "SELECT * FROM users WHERE username = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return new User(
+                        rs.getInt("id"),
+                        rs.getString("username"),
+                        rs.getString("password_hash"),
+                        rs.getString("role")
+                );
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public void update(User user) {
+        String sql = "UPDATE users SET username = ?, password_hash = ?, role = ? WHERE id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, user.getUsername());
+            stmt.setString(2, user.getHashedPassword());
+            stmt.setString(3, user.getRole());
+            stmt.setInt(4, user.getId());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

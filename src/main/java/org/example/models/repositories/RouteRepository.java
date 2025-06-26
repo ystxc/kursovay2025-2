@@ -1,7 +1,6 @@
 package org.example.models.repositories;
 
 import org.example.models.entities.Route;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,29 +54,21 @@ public class RouteRepository implements Repository<Route> {
 
     @Override
     public void create(Route route) {
-        // id не вставляем — пусть база генерирует
-        String sql = "INSERT INTO routes (name, estimated_distance, base_payment, company_id) VALUES (?, ?, ?, ?)";
-        try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            stmt.setString(1, route.getName());
-            stmt.setBigDecimal(2, route.getEstimatedDistance());
-            stmt.setBigDecimal(3, route.getBasePayment());
-            stmt.setInt(4, route.getCompanyId());
-
-            int affectedRows = stmt.executeUpdate();
-
-            if (affectedRows == 0) {
-                throw new SQLException("Creating route failed, no rows affected.");
-            }
-
-            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    route.setId(generatedKeys.getInt(1)); // сохранить сгенерированный id в объект
-                }
-            }
+        String sql = "INSERT INTO routes (id, name, estimated_distance, base_payment, company_id) VALUES (?, ?, ?, ?, ?)";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, route.getId());
+            stmt.setString(2, route.getName());
+            stmt.setBigDecimal(3, route.getEstimatedDistance());
+            stmt.setBigDecimal(4, route.getBasePayment());
+            stmt.setInt(5, route.getCompanyId());
+            stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
     }
+
+
 
     @Override
     public void update(Route route) {

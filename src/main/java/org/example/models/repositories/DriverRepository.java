@@ -19,7 +19,6 @@ public class DriverRepository implements Repository<Driver> {
                     ""
             );
         } catch (ClassNotFoundException | SQLException e) {
-            // Можно заменить на логгер, например Log4j или SLF4J
             e.printStackTrace();
             throw new RuntimeException("Failed to initialize DriverRepository", e);
         }

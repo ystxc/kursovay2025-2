@@ -13,10 +13,8 @@ public class CompanyRepository implements Repository<Company> {
 
     private CompanyRepository() {
         try {
-            // 1. Регистрация драйвера (для Java 9+)
             Class.forName("org.mariadb.jdbc.Driver");
 
-            // 2. Установка соединения (замените логин и пароль на ваши)
             connection = DriverManager.getConnection(
                     "jdbc:mariadb://localhost:3306/cargo_transportation?useSSL=false&serverTimezone=UTC",
                     "root",
@@ -51,7 +49,7 @@ public class CompanyRepository implements Repository<Company> {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return new ArrayList<>(cache); // Чтобы не отдавать внутренний список напрямую
+        return new ArrayList<>(cache);
     }
 
     @Override

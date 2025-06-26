@@ -36,7 +36,26 @@ public class AuthController {
         }
     }
 
-    public User findByUsername(String username) {
-        return userRepository.findByUsername(username);
+
+    public boolean updateUserProfile(int userId, String oldPassword, String newUsername, String newPassword) {
+        User user = userRepository.getById(userId);
+        if (user == null) return false;
+
+        String oldHashed = hashPassword(oldPassword);
+        if (!user.getHashedPassword().equals(oldHashed)) {
+            return false; // Старый пароль не совпадает
+        }
+
+        User existingUser = userRepository.findByUsername(newUsername);
+        if (existingUser != null && existingUser.getId() != userId) {
+            return false; // логин уже занят другим
+        }
+
+        user.setUsername(newUsername);
+        user.setHashedPassword(hashPassword(newPassword));
+
+        userRepository.update(user);
+        return true;
     }
+
 }

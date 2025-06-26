@@ -18,11 +18,13 @@ public abstract class BaseView<T> extends JFrame {
     public BaseView(String title, String[] columnNames, Repository<T> repository) {
         this.repository = repository;
 
-        setTitle(title);
-        setSize(700, 500);
+        setTitle("logistics++ - " + title);
+        setSize(900, 650);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        getContentPane().setBackground(Color.WHITE);
 
+        // Стили для таблицы
         tableModel = new DefaultTableModel(columnNames, 0) {
             public boolean isCellEditable(int row, int column) {
                 return false;
@@ -32,22 +34,35 @@ public abstract class BaseView<T> extends JFrame {
         table = new JTable(tableModel);
         table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         table.setRowHeight(26);
+        table.setSelectionBackground(new Color(230, 242, 255));
+        table.setGridColor(new Color(220, 220, 220));
+        table.setShowGrid(true);
+
         JTableHeader header = table.getTableHeader();
         header.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        header.setBackground(new Color(176, 224, 230));
+        header.setForeground(Color.BLACK);
 
         JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
 
         // Форма ввода
         formPanel = new JPanel();
         formPanel.setLayout(new GridLayout(0, 2, 10, 10));
-        formPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        formPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createTitledBorder("Форма для ввода"),
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
+        formPanel.setBackground(Color.WHITE);
 
         // Кнопки
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 15));
-        btnCreate = new JButton("Create");
-        btnUpdate = new JButton("Update");
-        btnDelete = new JButton("Delete");
-        btnRefresh = new JButton("Refresh");
+        buttonPanel.setBackground(Color.WHITE);
+
+        btnCreate = createButton("Создать", new Color(176, 224, 230));
+        btnUpdate = createButton("Изменить", new Color(176, 224, 230));
+        btnDelete = createButton("Удалить", new Color(255, 99, 71));
+        btnRefresh = createButton("Обновить", new Color(176, 224, 230));
 
         Font btnFont = new Font("Segoe UI", Font.BOLD, 14);
         Dimension btnSize = new Dimension(110, 36);
@@ -57,9 +72,15 @@ public abstract class BaseView<T> extends JFrame {
             buttonPanel.add(btn);
         }
 
-        add(formPanel, BorderLayout.NORTH);
-        add(scrollPane, BorderLayout.CENTER);
-        add(buttonPanel, BorderLayout.SOUTH);
+        // Основная компоновка
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        mainPanel.setBackground(Color.WHITE);
+        mainPanel.add(formPanel, BorderLayout.NORTH);
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        add(mainPanel);
 
         btnRefresh.addActionListener(e -> loadData());
 
@@ -77,13 +98,27 @@ public abstract class BaseView<T> extends JFrame {
         loadData();
     }
 
+    private JButton createButton(String text, Color bgColor) {
+        JButton btn = new JButton(text);
+        btn.setBackground(bgColor);
+        btn.setForeground(Color.BLACK);
+        btn.setFocusPainted(false);
+        btn.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(200, 200, 200)),
+                BorderFactory.createEmptyBorder(5, 15, 5, 15)
+        ));
+        return btn;
+    }
+
     protected void addFormField(String label, JComponent field) {
-        formPanel.add(new JLabel(label));
+        JLabel lbl = new JLabel(label);
+        lbl.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        formPanel.add(lbl);
         formPanel.add(field);
     }
 
-    protected abstract void initForm();                 // Создание формы ввода (сверху)
-    protected abstract void fillFormFromTable(int row); // Заполнение полей при выборе строки
-    protected abstract void loadData();                  // Загрузка данных из БД
-    protected abstract void initActions();               // Навешивание событий на кнопки
+    protected abstract void initForm();
+    protected abstract void fillFormFromTable(int row);
+    protected abstract void loadData();
+    protected abstract void initActions();
 }
