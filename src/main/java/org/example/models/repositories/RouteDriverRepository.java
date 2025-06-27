@@ -2,12 +2,10 @@ package org.example.models.repositories;
 
 import org.example.models.entities.RouteDriver;
 
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class RouteDriverRepository implements Repository<RouteDriver> {
 
@@ -63,29 +61,75 @@ public class RouteDriverRepository implements Repository<RouteDriver> {
 
     @Override
     public void create(RouteDriver entity) {
-        storage.add(entity);
+        Objects.requireNonNull(entity, "RouteDriver cannot be null");
+        final String sql = """
+            INSERT INTO route_drivers 
+            (route_id, driver_id, departure_date, arrival_date, bonus_status, actual_payment) 
+            VALUES (?, ?, ?, ?, ?, ?)
+            """;
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            setParameters(stmt, entity);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to create route-driver assignment: " + entity, e);
+        }
     }
 
     @Override
     public void update(RouteDriver entity) {
+        Objects.requireNonNull(entity, "RouteDriver cannot be null");
+        final String sql = """
+            UPDATE route_drivers 
+            SET departure_date = ?, arrival_date = ?, bonus_status = ?, actual_payment = ? 
+            WHERE route_id = ? AND driver_id = ?
+            """;
 
-        for (int i = 0; i < storage.size(); i++) {
-            RouteDriver rd = storage.get(i);
-            if (rd.getRouteId() == entity.getRouteId() && rd.getDriverId() == entity.getDriverId()) {
-                storage.set(i, entity);
-                return;
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setDate(1, Date.valueOf(entity.getDepartureDate().toLocalDate()));
+            stmt.setDate(2, Date.valueOf(entity.getArrivalDate().toLocalDate()));
+            stmt.setBoolean(3, entity.isBonusStatus());
+            stmt.setBigDecimal(4, entity.getActualPayment());
+            stmt.setInt(5, entity.getRouteId());
+            stmt.setInt(6, entity.getDriverId());
+
+            int affectedRows = stmt.executeUpdate();
+            if (affectedRows == 0) {
+                throw new IllegalArgumentException("Route-driver assignment not found for update");
             }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to update route-driver assignment: " + entity, e);
         }
-        throw new IllegalArgumentException("Объект для обновления не найден");
     }
 
     @Override
     public void delete(int id) {
-        // составной ключ
-        throw new UnsupportedOperationException("Вместо этого используйте delete(идентификатор маршрута, идентификатор водителя).");
+        throw new UnsupportedOperationException("Use delete(int routeId, int driverId) instead");
     }
-    // Метод удаления по составному ключу
+
     public void delete(int routeId, int driverId) {
-        storage.removeIf(rd -> rd.getRouteId() == routeId && rd.getDriverId() == driverId);
+        final String sql = "DELETE FROM route_drivers WHERE route_id = ? AND driver_id = ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, routeId);
+            stmt.setInt(2, driverId);
+
+            int affectedRows = stmt.executeUpdate();
+            if (affectedRows == 0) {
+                throw new IllegalArgumentException("Route-driver assignment not found for deletion");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(
+                    String.format("Failed to delete route-driver assignment [routeId=%d, driverId=%d]",
+                            routeId, driverId), e);
+        }
+    }
+    private void setParameters(PreparedStatement stmt, RouteDriver entity) throws SQLException {
+        stmt.setInt(1, entity.getRouteId());
+        stmt.setInt(2, entity.getDriverId());
+        stmt.setDate(3, Date.valueOf(entity.getDepartureDate().toLocalDate()));
+        stmt.setDate(4, Date.valueOf(entity.getArrivalDate().toLocalDate()));
+        stmt.setBoolean(5, entity.isBonusStatus());
+        stmt.setBigDecimal(6, entity.getActualPayment());
     }
 }
